@@ -11,6 +11,17 @@ VortLang is a minimal interpreted programming language written in Rust. Designed
 - **Expression Evaluation**: Supports arithmetic operations with keywords like `plus`, `minus`, etc.
 - **Error Handling**: Clear error messages for undefined variables or invalid syntax.
 
+## Current Status  
+
+VortLang is in its early stages and currently supports basic features like variable declarations and arithmetic. More functionality (e.g., control flow, functions) is planned for future releases. Stay tuned!  
+
+**Planned Features:**  
+- `if`/`else` conditions  
+- Loops (`while`, `for`)  
+- User-defined functions  
+- Lists/arrays
+- And more...
+
 ## Installation
 
 1. Ensure [Rust and Cargo](https://www.rust-lang.org/tools/install) are installed.
@@ -20,7 +31,7 @@ VortLang is a minimal interpreted programming language written in Rust. Designed
    ```
 3. Build the project:
    ```bash
-   cd VortLang
+   cd VortLang/lang
    cargo build --release
    ```
 
