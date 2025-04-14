@@ -1,22 +1,30 @@
-name: Rust
+name: Build VortLang
 
 on:
   push:
-    branches: [ "main" ]
+    paths:
+      - 'lang/**'
   pull_request:
-    branches: [ "main" ]
-
-env:
-  CARGO_TERM_COLOR: always
+    paths:
+      - 'lang/**'
 
 jobs:
   build:
-
     runs-on: ubuntu-latest
 
     steps:
-    - uses: actions/checkout@v4
-    - name: Build
-      run: cargo build --verbose
-    - name: Run tests
-      run: cargo test --verbose
+      - name: checkout repo
+        uses: actions/checkout@v4
+
+      - name: set up rust
+        uses: actions/setup-rust@v1
+        with:
+          rust-version: stable
+
+      - name: build VortLang
+        run: cargo build --release
+        working-directory: lang
+
+      - name: run tests
+        run: cargo test
+        working-directory: lang
