@@ -1,0 +1,13 @@
+let a = "Hello, World!"
+num b = 1.5
+num c 2 times 2
+
+print(a);
+print(b);
+print(c);
+
+# Expected Output:
+#
+# Hello, World!
+# 1.5
+# 4
