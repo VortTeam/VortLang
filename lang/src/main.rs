@@ -19,6 +19,7 @@ fn main() {
     let code = fs::read_to_string(filename).expect("Error reading file");
 
     match parser::parse(&code) {
+        Ok(()) => {},
         Err(e) => eprintln!("Error: {}", e),
-    }
+}
 }
