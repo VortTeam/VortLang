@@ -1,6 +1,7 @@
 # VortLang
 
 VortLang is a minimal interpreted programming language written in Rust. Designed with simplicity and learning in mind, it offers clean syntax and fast execution.
+Its syntax is similar to Python's and Rust's.
 
 ![License](https://img.shields.io/badge/License-Apache%202.0-blue.svg)
 
@@ -57,40 +58,8 @@ Output:
 ```
 Hello World! Result: 20
 ```
-
-## Syntax Guide
-
-### Variable Declaration
-- **Strings**: Enclose in quotes.
-  ```rust
-  let message = "Hello"
-  ```
-- **Numbers**: Use arithmetic expressions.
-  ```python
-  num result = 5 plus 3 times 2  # Evaluates to 11
-  ```
-
-### Print Statements
-- **Basic string**:
-  ```python
-  print("Hello World")
-  ```
-- **Formatted string** (use `o"..."`):
-  ```python
-  print(o"Value: {result}")
-  ```
-
-### Operators
-Use keywords or symbols:
-- `plus` or `+`
-- `minus` or `-`
-- `times`/`multiply` or `*`
-- `divide` or `/`
-
-Example:
-```python
-num calc = 10 divide 2 minus 3  # Evaluates to 2
-```
+## Documentation
+[here](/docs)
 
 ## License
 
@@ -98,4 +67,4 @@ Licensed under [Apache 2.0](LICENSE).
 
 ## Contributing
 
-Contributions are welcome! Fork the repository and submit a pull request. For major changes, open an issue first.
+Contributions are welcome! If you are interested in contributing please check [CONTRIBUTING.md](CONTRIBUTING.md)
