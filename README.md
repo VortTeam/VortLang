@@ -41,6 +41,10 @@ Run a VortLang script:
 ```bash
 cargo run --release <filename.vl>
 ```
+or
+```bash
+path\to\vortlang.exe <filename.vl>
+```
 
 ### Example Script (`hello.vl`)
 ```rust
