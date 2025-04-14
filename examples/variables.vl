@@ -1,10 +1,10 @@
 let a = "Hello, World!"
 num b = 1.5
-num c 2 times 2
+num result = 2 times 2
 
-print(a);
-print(b);
-print(c);
+print(a)
+print(b)
+print(result)
 
 # Expected Output:
 #
