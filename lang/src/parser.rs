@@ -48,17 +48,17 @@ mod statement_parser {
         if assignment_parts.len() != 2 {
             return Err(VortError::ParseError("Invalid variable assignment".into()));
         }
-
+    
         let var_declaration = assignment_parts[0].trim();
         let var_name = var_declaration
             .strip_prefix("let")
             .ok_or(VortError::ParseError("Missing 'let' in declaration".into()))?
             .trim();
-
+    
         if var_name.is_empty() {
             return Err(VortError::ParseError("Empty variable name".into()));
         }
-
+    
         let value_str = assignment_parts[1].trim();
         let value = if value_str.starts_with('"') && value_str.ends_with('"') {
             VariableValue::String(value_str[1..value_str.len() - 1].to_string())
@@ -68,7 +68,7 @@ mod statement_parser {
             ));
         };
         
-        variables.insert(var_name.to_string(), value);
+        variables.insert(var_name.to_string(), value)?;
         Ok(())
     }
 
@@ -77,20 +77,20 @@ mod statement_parser {
         if assignment_parts.len() != 2 {
             return Err(VortError::ParseError("Invalid variable assignment".into()));
         }
-
+    
         let var_declaration = assignment_parts[0].trim();
         let var_name = var_declaration
             .strip_prefix("num")
             .ok_or(VortError::ParseError("Missing 'num' in declaration".into()))?
             .trim();
-
+    
         if var_name.is_empty() {
             return Err(VortError::ParseError("Empty variable name".into()));
         }
-
+    
         let value_str = assignment_parts[1].trim();
         let value = expressions::evaluate_expression(value_str, variables)?;
-        variables.insert(var_name.to_string(), VariableValue::Number(value));
+        variables.insert(var_name.to_string(), VariableValue::Number(value))?;
         Ok(())
     }
 
