@@ -1,0 +1,9 @@
+# This is the simplest VortLang program - it just prints a message to the screen
+# Lines starting with # are comments and are ignored by the interpreter
+
+# The print statement displays text to the console
+# Text must be enclosed in double quotes
+print("Hello, World!");
+
+# Every statement in VortLang must end with a semicolon
+# The semicolon tells the interpreter that the statement is complete
