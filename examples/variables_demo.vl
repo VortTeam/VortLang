@@ -1,0 +1,33 @@
+# This program demonstrates the different variable types in VortLang
+# and the type checking system
+
+# String variables - defined with the 'let' keyword
+let name = "Alice";    # Store a name as a string
+let city = "New York"; # Store a city as a string
+
+# Numeric variables - defined with the 'num' keyword
+num age = 28;          # Store an integer
+num height = 5.7;      # Store a decimal number
+num score = 95.5;      # Store another decimal
+
+# Display the values using string interpolation
+print(o"Person: {name}, Age: {age}");
+print(o"{name} lives in {city}");
+print(o"Height: {height} ft, Score: {score}%");
+
+# Numeric expressions
+# We can use numeric variables in calculations
+num double_age = age times 2;   # Multiply age by 2
+num half_score = score divide 2; # Divide score by 2
+
+# Display the results
+print(o"Double age: {double_age}");
+print(o"Half score: {half_score}");
+
+# NOTE: VortLang enforces type safety
+# The following would cause an error if uncommented:
+# let str_var = "Hello";
+# num str_var = 42;  # Error: Can't change string variable to number
+
+# num num_var = 100;
+# let num_var = "Hi"; # Error: Can't change numeric variable to string
