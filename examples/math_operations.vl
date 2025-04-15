@@ -1,0 +1,55 @@
+# This program demonstrates the mathematical operations available in VortLang
+
+# Define some numbers to work with
+num a = 10;
+num b = 3;
+num c = 7;
+
+# Basic operations
+print(o"Basic Math Operations:");
+
+# Addition (using 'plus' keyword)
+num sum = a plus b;
+print(o"{a} + {b} = {sum}");
+
+# Subtraction (using 'minus' keyword) 
+num difference = a minus b;
+print(o"{a} - {b} = {difference}");
+
+# Multiplication (using 'times' keyword)
+num product1 = a times b;
+print(o"{a} × {b} = {product1}");
+
+# Multiplication (using 'multiply' keyword - alternative syntax)
+num product2 = a multiply b;
+print(o"{a} × {b} = {product2}");
+
+# Division (using 'divide' keyword)
+num quotient = a divide b;
+print(o"{a} ÷ {b} = {quotient}");
+
+# More complex expressions
+print(o"Complex Expressions:");
+
+# Parentheses control the order of operations
+num exp1 = (a plus b) times c;
+print(o"({a} + {b}) × {c} = {exp1}");
+
+# Without parentheses, standard operator precedence applies
+# (multiplication happens before addition)
+num exp2 = a plus b times c;
+print(o"{a} + {b} × {c} = {exp2}");
+
+# Multiple operations with parentheses
+num exp3 = (a plus b) times (c minus a);
+print(o"({a} + {b}) × ({c} - {a}) = {exp3}");
+
+# Decimal numbers work too
+num d = 5.5;
+num e = 2.5;
+num decimal_result = d times e;
+print(o"{d} × {e} = {decimal_result}");
+
+# Using numeric literals with underscores for readability
+num population = 1_000_000;  # One million
+print(o"Population: {population}");
