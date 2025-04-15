@@ -1,0 +1,21 @@
+# This program demonstrates basic arithmetic operations in VortLang
+
+# Declare numeric variables using the 'num' keyword
+# Numbers can be integers or decimals
+num a = 15;   # Assign the value 15 to variable 'a'
+num b = 7;    # Assign the value 7 to variable 'b'
+
+# Perform arithmetic operations and store results in new variables
+num sum = a plus b;           # Addition (15 + 7 = 22)
+num difference = a minus b;   # Subtraction (15 - 7 = 8)
+num product = a times b;      # Multiplication (15 * 7 = 105)
+num quotient = a divide b;    # Division (15 / 7 = 2.142857...)
+
+# Print the results using formatted strings (string interpolation)
+# The 'o' before the quotation marks enables string formatting
+# Variables inside curly braces {} are replaced with their values
+print(o"a = {a}, b = {b}");   # Shows the original values
+print(o"Sum: {sum}");         # Shows the result of addition
+print(o"Difference: {difference}");  # Shows the result of subtraction
+print(o"Product: {product}");        # Shows the result of multiplication
+print(o"Quotient: {quotient}");      # Shows the result of division
