@@ -1,0 +1,15 @@
+# This program demonstrates working with string variables
+
+# Declare string variables using the 'let' keyword
+# String values must be enclosed in double quotes
+let first_name = "John";  # Assign the string "John" to variable 'first_name'
+let last_name = "Doe";    # Assign the string "Doe" to variable 'last_name'
+
+# Display a greeting that includes both names
+# String interpolation (using o"..." syntax) allows us to combine strings and variables
+# Each variable name in {} is replaced with its value
+print(o"Hello, {first_name} {last_name}!");
+# The output will be: "Hello, John Doe!"
+
+# Note: VortLang doesn't have a built-in string concatenation operator
+# String interpolation is the way to combine strings
