@@ -1,13 +1,15 @@
 use crate::tokenizer::{Token, replace_operator_keywords};
 use crate::variables::VariableStore;
-use crate::error::VortError;
+use crate::error::{VortError, VortErrorKind};
 
 pub fn evaluate_expression(
     expr: &str,
     variables: &VariableStore,
 ) -> Result<f64, VortError> {
     let expr = replace_operator_keywords(expr);
-    let tokens = crate::tokenizer::tokenize(&expr)?;
+    let tokens = crate::tokenizer::tokenize(&expr)
+        .map_err(|e| VortError::eval_error(format!("Failed to tokenize expression: {}", e)))?;
+    
     let postfix = shunting_yard(tokens)?;
     evaluate_postfix(&postfix, variables)
 }
@@ -29,13 +31,23 @@ fn shunting_yard(tokens: Vec<Token>) -> Result<Vec<Token>, VortError> {
             Token::Number(_) | Token::Variable(_) => output.push(token),
             Token::LeftParen => op_stack.push(token),
             Token::RightParen => {
+                let mut found_matching_paren = false;
                 while let Some(top) = op_stack.last() {
                     if matches!(top, Token::LeftParen) {
+                        found_matching_paren = true;
                         break;
                     }
                     output.push(op_stack.pop().unwrap());
                 }
-                op_stack.pop().ok_or(VortError::EvalError("Mismatched parentheses".into()))?;
+                
+                if !found_matching_paren {
+                    return Err(VortError::new(
+                        VortErrorKind::MismatchedParentheses,
+                        "Mismatched parentheses: extra closing parenthesis".to_string()
+                    ));
+                }
+                
+                op_stack.pop();
             }
             Token::Operator(op) => {
                 while let Some(Token::Operator(stack_op)) = op_stack.last() {
@@ -50,10 +62,16 @@ fn shunting_yard(tokens: Vec<Token>) -> Result<Vec<Token>, VortError> {
         }
     }
 
-    while let Some(op) = op_stack.pop() {
-        if matches!(op, Token::LeftParen | Token::RightParen) {
-            return Err(VortError::EvalError("Mismatched parentheses".into()));
+    for op in op_stack.iter() {
+        if matches!(op, Token::LeftParen) {
+            return Err(VortError::new(
+                VortErrorKind::MismatchedParentheses,
+                "Mismatched parentheses: unclosed opening parenthesis".to_string()
+            ));
         }
+    }
+
+    while let Some(op) = op_stack.pop() {
         output.push(op);
     }
 
@@ -73,18 +91,17 @@ fn evaluate_postfix(
                 match variables.get(var_name) {
                     Some(crate::variables::VariableValue::Number(n)) => stack.push(*n),
                     Some(crate::variables::VariableValue::String(_)) => 
-                        return Err(VortError::EvalError(
-                            format!("Variable '{}' is a string, expected number", var_name)
+                        return Err(VortError::type_mismatch(
+                            "number", "string", 
+                            &format!("Variable '{}'", var_name)
                         )),
-                    None => return Err(VortError::EvalError(
-                        format!("Undefined variable: {}", var_name)
-                    )),
+                    None => return Err(VortError::undefined_variable(var_name)),
                 }
             }
             Token::Operator(op) => {
                 if stack.len() < 2 {
-                    return Err(VortError::EvalError(
-                        "Not enough operands for operator".into()
+                    return Err(VortError::eval_error(
+                        format!("Not enough operands for operator '{}'", op)
                     ));
                 }
                 let b = stack.pop().unwrap();
@@ -93,21 +110,29 @@ fn evaluate_postfix(
                     "+" => a + b,
                     "-" => a - b,
                     "*" => a * b,
-                    "/" => a / b,
-                    _ => return Err(VortError::EvalError(
+                    "/" => {
+                        if b == 0.0 {
+                            return Err(VortError::new(
+                                VortErrorKind::DivisionByZero,
+                                "Division by zero".to_string()
+                            ));
+                        }
+                        a / b
+                    },
+                    _ => return Err(VortError::eval_error(
                         format!("Unknown operator: {}", op)
-                    ),
-                )};
+                    )),
+                };
                 stack.push(result);
             }
-            _ => return Err(VortError::EvalError(
-                "Unexpected token in postfix expression".into()
+            _ => return Err(VortError::eval_error(
+                "Unexpected token in postfix expression".to_string()
             )),
         }
     }
 
     if stack.len() != 1 {
-        return Err(VortError::EvalError("Invalid expression".into()));
+        return Err(VortError::eval_error("Invalid expression: too many values".to_string()));
     }
 
     Ok(stack.pop().unwrap())
