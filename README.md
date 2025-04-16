@@ -14,14 +14,7 @@ Its syntax is similar to Python's and Rust's.
 
 ## Current Status  
 
-VortLang is in its early stages and currently supports basic features like variable declarations and arithmetic. More functionality (e.g., control flow, functions) is planned for future releases. Stay tuned!  
-
-**Planned Features:**  
-- `if`/`else` conditions  
-- Loops (`while`, `for`)  
-- User-defined functions  
-- Lists/arrays
-- And more...
+VortLang is in its early stages and currently supports basic features like variable declarations and arithmetic. More functionality is planned for future releases. Stay tuned!  
 
 ## Installation
 
