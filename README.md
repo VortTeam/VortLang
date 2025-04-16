@@ -56,7 +56,7 @@ Hello World! Result: 20
 
 ## License
 
-Licensed under [Apache 2.0](LICENSE).
+Licensed under [VORTTEAM GITHUB LICENSE VERSION 1.0](LICENSE).
 
 ## Contributing
 
