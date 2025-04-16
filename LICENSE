@@ -4,33 +4,22 @@ Copyright (c) 2025 VortTeam
 
 Permission is hereby granted, free of charge, to any person obtaining a copy of this software and associated documentation files (the "Software"), to use, copy, modify, and share the Software, subject to the following conditions:
 
-1. ATTRIBUTION REQUIRED
-   Any copies, modifications, or redistributions of the Software, in whole or in part, must retain clear and visible credit to the original author, and include a notice that it was copied or based on work by the original author.
+1. ATTRIBUTION REQUIRED Any copies, modifications, or redistributions of the Software, in whole or in part, must retain clear and visible credit to the original author, and include a notice that it was copied or based on work by the original author.
 
-2. NON-COMMERCIAL USE ONLY
-   The Software may not be sold, licensed, sublicensed, or otherwise monetized in any form, including but not limited to paid access, advertising-based platforms, or integration into commercial products or services.
+2. COMMERCIAL USE RESTRICTED TO CREATOR Only the creator of the Software may sell, license, sublicense, or otherwise monetize the Software in any form, including but not limited to paid access, advertising-based platforms, or integration into commercial products or services. All other users are prohibited from any commercial use of the Software.
 
-3. PROHIBITED USES
-   The Software may not be used
-   a. For any unlawful purpose or in violation of any applicable laws or regulations
-   b. In any manner that infringes the rights, including intellectual property rights, of others
-   c. To engage in, support, or facilitate any form of harassment, abuse, surveillance, or harm to individuals or communities.
+3. PROHIBITED USES The Software may not be used a. For any unlawful purpose or in violation of any applicable laws or regulations b. In any manner that infringes the rights, including intellectual property rights, of others c. To engage in, support, or facilitate any form of harassment, abuse, surveillance, or harm to individuals or communities.
 
-4. ARTIFICIAL INTELLIGENCE AND MACHINE LEARNING
-   The Software and its contents may not be used, in whole or in part, to train, fine-tune, or otherwise enhance machine learning or artificial intelligence models by individuals or automated systems accessing the repository, except as permitted below.
-   The platform hosting the Software (currently GitHub) is permitted to use the Software for commercial machine learning purposes, provided that such use includes clear and visible attribution to the original author in any resulting models, datasets, or derivative works.
-   Other than the hosting platform, use of the Software for machine learning or artificial intelligence purposes is permitted solely for non-commercial, research, or educational purposes. Commercial model training and dataset harvesting by any other entities or individuals are strictly prohibited.
+4. ARTIFICIAL INTELLIGENCE AND MACHINE LEARNING The Software and its contents may not be used, in whole or in part, to train, fine-tune, or otherwise enhance machine learning or artificial intelligence models by individuals or automated systems accessing the repository, except as permitted below. The platform hosting the Software (currently GitHub) is permitted to use the Software for commercial machine learning purposes, provided that such use includes clear and visible attribution to the original author in any resulting models, datasets, or derivative works. Other than the hosting platform, use of the Software for machine learning or artificial intelligence purposes is permitted solely for non-commercial, research, or educational purposes. Commercial model training and dataset harvesting by any other entities or individuals, except the creator (VortTeam), are strictly prohibited.
 
-5. PRIVACY AND DATA PROTECTION
-   Users of the Software must comply with all applicable data protection laws, including the General Data Protection Regulation (GDPR) where applicable. The Software may not include tracking, analytics, telemetry, or data collection mechanisms without the informed, active, and revocable consent of the end user.
+5. PRIVACY AND DATA PROTECTION Users of the Software must comply with all applicable data protection laws, including the General Data Protection Regulation (GDPR) where applicable. The Software may not include tracking, analytics, telemetry, or data collection mechanisms without the informed, active, and revocable consent of the end user.
 
-6. PRESERVATION OF ATTRIBUTION
-   Redistributions or modified versions of the Software must not remove or obscure the original attribution to the author. Any files or repositories that include parts of the Software must clearly state the original author's name and that the code was copied or adapted from the original.
+6. PRESERVATION OF ATTRIBUTION Redistributions or modified versions of the Software must not remove or obscure the original attribution to the author. Any files or repositories that include parts of the Software must clearly state the original author's name and that the code was copied or adapted from the original.
 
-7. NO WARRANTY
-   THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE, AND NON-INFRINGEMENT. IN NO EVENT SHALL THE AUTHOR OR COPYRIGHT HOLDER BE LIABLE FOR ANY CLAIM, DAMAGES, OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT, OR OTHERWISE, ARISING FROM, OUT OF, OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
+7. NO WARRANTY THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE, AND NON-INFRINGEMENT. IN NO EVENT SHALL THE AUTHOR OR COPYRIGHT HOLDER BE LIABLE FOR ANY CLAIM, DAMAGES, OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT, OR OTHERWISE, ARISING FROM, OUT OF, OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
-8. HOSTING PLATFORM
-   The Software is currently hosted on GitHub. Any use of the Software by the hosting platform must comply with the terms of this license, including the attribution requirements and the specific provisions for commercial machine learning use outlined in Section 4.
+8. HOSTING PLATFORM The Software is currently hosted on GitHub. Any use of the Software by the hosting platform must comply with the terms of this license, including the attribution requirements and the specific provisions for commercial machine learning use outlined in Section 4.
 
 END OF TERMS AND CONDITIONS
+
+This license is available at https://vorttean.com/licenses/vortteam-github-license-v1
