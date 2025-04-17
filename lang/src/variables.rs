@@ -21,12 +21,12 @@ impl VariableStore {
         if let Some(existing) = self.variables.get(&name) {
             match (existing, &value) {
                 (VariableValue::String(_), VariableValue::Number(_)) => {
-                    return Err(VortError::RuntimeError(
+                    return Err(VortError::runtime_error(
                         format!("Can't change value of a string variable ({}) to a number", name)
                     ));
                 }
                 (VariableValue::Number(_), VariableValue::String(_)) => {
-                    return Err(VortError::RuntimeError(
+                    return Err(VortError::runtime_error(
                         format!("Can't change value of a numerical variable ({}) to a string", name)
                     ));
                 }
