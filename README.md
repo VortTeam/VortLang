@@ -52,7 +52,7 @@ Output:
 Hello World! Result: 20
 ```
 ## Documentation
-[here](/docs)
+[here](/doc)
 
 ## License
 
