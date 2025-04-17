@@ -1,4 +1,4 @@
-VORTTEAM GITHUB LICENSE VERSION 1.0, APRIL 16, 2025
+VORTTEAM GITHUB LICENSE VERSION 1.0, APRIL 17, 2025
 
 Copyright (c) 2025 VortTeam
 
@@ -10,7 +10,7 @@ Permission is hereby granted, free of charge, to any person obtaining a copy of 
 
 3. PROHIBITED USES The Software may not be used a. For any unlawful purpose or in violation of any applicable laws or regulations b. In any manner that infringes the rights, including intellectual property rights, of others c. To engage in, support, or facilitate any form of harassment, abuse, surveillance, or harm to individuals or communities.
 
-4. ARTIFICIAL INTELLIGENCE AND MACHINE LEARNING The Software and its contents may not be used, in whole or in part, to train, fine-tune, or otherwise enhance machine learning or artificial intelligence models by individuals or automated systems accessing the repository, except as permitted below. The platform hosting the Software (currently GitHub) is permitted to use the Software for commercial machine learning purposes, provided that such use includes clear and visible attribution to the original author in any resulting models, datasets, or derivative works. Other than the hosting platform, use of the Software for machine learning or artificial intelligence purposes is permitted solely for non-commercial, research, or educational purposes. Commercial model training and dataset harvesting by any other entities or individuals, except the creator (VortTeam), are strictly prohibited.
+4. ARTIFICIAL INTELLIGENCE AND MACHINE LEARNING The Software and its contents may not be used, in whole or in part, to train, fine-tune, or otherwise enhance machine learning or artificial intelligence models by individuals or automated systems accessing the repository, except as permitted below. The platform hosting the Software (currently GitHub) is permitted to use the Software for commercial machine learning purposes, provided that such use includes clear and visible attribution to the original author in any resulting models, datasets, or derivative works. Other than the hosting platform, use of the Software for machine learning or artificial intelligence purposes is permitted solely for non-commercial, research, or educational purposes. Commercial model training and dataset harvesting by any other entities or individuals, except the creator, are strictly prohibited.
 
 5. PRIVACY AND DATA PROTECTION Users of the Software must comply with all applicable data protection laws, including the General Data Protection Regulation (GDPR) where applicable. The Software may not include tracking, analytics, telemetry, or data collection mechanisms without the informed, active, and revocable consent of the end user.
 
@@ -21,5 +21,3 @@ Permission is hereby granted, free of charge, to any person obtaining a copy of 
 8. HOSTING PLATFORM The Software is currently hosted on GitHub. Any use of the Software by the hosting platform must comply with the terms of this license, including the attribution requirements and the specific provisions for commercial machine learning use outlined in Section 4.
 
 END OF TERMS AND CONDITIONS
-
-This license is available at https://vortteam.com/licenses/vortteam-github-license-v1
