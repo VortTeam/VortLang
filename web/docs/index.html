@@ -1,0 +1,178 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>VortLang Documentation</title>
+  <link rel="icon" type="image/png" href="https://raw.githubusercontent.com/VortTeam/VortLang/main/web/vortlang.png">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/atom-one-dark.min.css">
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/highlight.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/marked/4.3.0/marked.min.js"></script>
+  <style>
+    body {
+      margin: 0;
+      padding: 0;
+      font-family: Arial, sans-serif;
+      color: #ffffff;
+      background-color: #1a1a1a;
+      display: flex;
+      min-height: 100vh;
+    }
+    .container {
+      display: flex;
+      width: 100%;
+      max-width: 1400px;
+      margin: 0 auto;
+      padding: 20px;
+    }
+    .main-content {
+      flex: 3;
+      padding: 20px;
+      background-color: #252526;
+      border-radius: 5px;
+      margin-right: 20px;
+      overflow-y: auto;
+    }
+    .toc {
+      flex: 1;
+      padding: 20px;
+      background-color: #252526;
+      border-radius: 5px;
+      top: 20px;
+      height: fit-content;
+      max-height: calc(100vh - 40px);
+      overflow-y: auto;
+    }
+    .toc h2 {
+      font-size: 1.5rem;
+      margin-bottom: 15px;
+      background: linear-gradient(45deg, #0058b0, #66b3ff);
+      -webkit-background-clip: text;
+      background-clip: text;
+      color: transparent;
+    }
+    .toc ul {
+      list-style: none;
+      padding: 0;
+    }
+    .toc li {
+      margin: 10px 0;
+    }
+    .toc a {
+      color: #66b3ff;
+      text-decoration: none;
+      font-size: 1rem;
+    }
+    .toc a:hover {
+      text-decoration: underline;
+    }
+    h1 {
+      font-size: 2.5rem;
+      background: linear-gradient(45deg, #0058b0, #66b3ff);
+      -webkit-background-clip: text;
+      background-clip: text;
+      color: transparent;
+      margin-bottom: 20px;
+    }
+    h2 {
+      font-size: 1.8rem;
+      color: #66b3ff;
+      margin-top: 30px;
+    }
+    h3 {
+      font-size: 1.4rem;
+      color: #66b3ff;
+      margin-top: 20px;
+    }
+    p, li {
+      line-height: 1.6;
+      color: #d4d4d4;
+    }
+    pre {
+      background-color: #1e1e1e;
+      padding: 15px;
+      border-radius: 5px;
+      overflow-x: auto;
+    }
+    code {
+      font-family: 'Consolas', monospace;
+    }
+    .header {
+      text-align: center;
+      padding: 20px;
+      border-bottom: 2px solid #00b7eb;
+    }
+    .github-btn {
+      color: white;
+      padding: 5px 10px;
+      border: none;
+      border-radius: 8px;
+      cursor: pointer;
+      margin-top: 10px;
+      position: fixed;
+      top: 10px;
+      right: 10px;
+    }
+    .github-btn:hover {
+      background-color: #555;
+    }
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      margin: 20px 0;
+    }
+    th, td {
+      border: 1px solid #444;
+      padding: 10px;
+      text-align: left;
+      color: #d4d4d4;
+    }
+    th {
+      background-color: #333;
+    }
+  </style>
+</head>
+<body>
+    <a href="https://github.com/VortTeam/VortLang/doc" target="_blank" class="github-btn">
+        <i class="fab fa-github"></i></a>
+  <div class="container">
+    <div class="main-content">
+      <div class="header">
+        <h1>VortLang Syntax Documentation</h1>
+      </div>
+      <div id="markdown-content"></div>
+    </div>
+    <div class="toc">
+      <h2>Table of Contents</h2>
+      <ul id="toc-list"></ul>
+    </div>
+  </div>
+  <script>
+    fetch('https://raw.githubusercontent.com/VortTeam/VortLang/main/doc/SYNTAX.md')
+      .then(response => response.text())
+      .then(data => {
+        const markdownContent = document.getElementById('markdown-content');
+        markdownContent.innerHTML = marked.parse(data);
+        hljs.highlightAll();
+
+        const tocList = document.getElementById('toc-list');
+        const headers = markdownContent.querySelectorAll('h2, h3');
+        headers.forEach((header, index) => {
+          const id = 'section-' + index;
+          header.id = id;
+          const li = document.createElement('li');
+          const a = document.createElement('a');
+          a.href = '#' + id;
+          a.textContent = header.textContent;
+          li.appendChild(a);
+          if (header.tagName === 'H3') {
+            li.style.paddingLeft = '20px';
+          }
+          tocList.appendChild(li);
+        });
+      })
+      .catch(error => console.error('Error fetching Markdown:', error));
+  </script>
+</body>
+</html>
