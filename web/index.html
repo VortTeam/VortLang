@@ -1,98 +1,80 @@
-<!-- Pls dont even talk about this shit and contribite!!!!! -->
-
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>VortLang</title>
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.7.2/css/all.min.css">
-    <link rel="icon" href="favicon.ico" type="image/x-icon">
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>VortLang</title>
+  <!DOCTYPE html>
+  <link rel="icon" type="image/png" href="https://raw.githubusercontent.com/VortTeam/VortLang/main/web/vortlang.png">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+  <style>
+    body {
+      margin: 0;
+      padding: 0;
+      height: 100vh;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      background-color: #1a1a1a;
+      font-family: Arial, sans-serif;
+      color: white;
+      overflow: hidden;
+    }
+    .container {
+      text-align: center;
+    }
+    h1 {
+      font: 6rem Arial, sans-serif;
+      margin: 0;
+      background: linear-gradient(
+        45deg,
+        #0058b0 40%,
+        #66b3ff 100%,
+        #0058b0 60%
+      );
+      -webkit-background-clip: text;
+      background-clip: text;
+      color: transparent;
+    }
+    .description {
+      background-color: rgba(0, 0, 0, 0.5);
+      border: 2px solid #00b7eb;
+      padding: 20px;
+      margin: 20px 0;
+      max-width: 500px;
+      font-size: 1.1rem;
+      line-height: 1.5;
+      border-radius: 5px;
+    }
+    .github-btn {
+      background-color: #333;
+      color: white;
+      padding: 10px 20px;
+      border: none;
+      border-radius: 5px;
+      font-size: 1.3rem;
+      cursor: pointer;
+      display: inline-flex;
+      align-items: center;
+      text-decoration: none;
+    }
+    .github-btn i {
+      margin-right: 8px;
+    }
+    .github-btn:hover {
+      background-color: #555;
+    }
+  </style>
 </head>
 <body>
-    <style>
-        :root {
-    --primary-color: #034078;
-    --secondary-color: #001F54;
-    --background-color: #0A1128;
-    --text-color: #FEFCFB;
-}
-
-body {
-    font-family: Arial, sans-serif;
-    background-color: var(--background-color);
-    color: var(--text-color);
-    margin: 0;
-    padding: 0;
-    display: flex;
-    justify-content: center;
-    height: 100vh;
-}
-
-main {
-    text-align: center;
-}
-
-header {
-    background-color: var(--primary-color);
-    padding: 12px;
-    width: 98.8vw;
-    position: relative;
-    left: 50%;
-    transform: translateX(-50%);
-}
-
-header h1 {
-    font-size: 2.5rem;
-    margin-bottom: 1rem;
-}
-
-a {
-    position: relative;
-    color: var(--text-color);
-    text-decoration: none;
-    font-size: 1.2rem;
-    background-color: var(--primary-color);
-    padding: 10px 20px;
-    border-radius: 5px;
-}
-a:hover {
-    background-color: var(--secondary-color);
-    transition: background-color 0.3s ease;
-}
-.github {
-    margin-bottom: 16px;
-}
-.description {
-font-size: 1.3rem;
-}
-
-.gh {
-    position: relative;
-    color: var(--text-color);
-    text-decoration: none;
-    font-size: 2rem;
-    background-color: var(--primary-color);
-    padding: 10px 20px;
-    border-radius: 5px;
-    margin-top: 20px;
-    display: inline-block;
-    justify-content: center;
-    align-items: center;
-    top: 20%;
-}
-
-    </style>
-    <main>
-        <header>
-            <h1>VortLang</h1>
-                <a href="https://github.com/vortteam/VortLang" target="_blank" aria-label="VortLang GitHub Repository" class="github"><i class="fa-brands fa-square-github"></i> GitHub </a>
-        </header>
-        <div class="description">
-            <p>A minimal interpreted programming language written in Rust. Designed with simplicity and learning in mind, it offers clean syntax and fast execution. Its syntax is similar to Python's and Rust's.</p>
-        </div>
-        <h1>No</h1>
-        <a class="gh" href="https://github.com/vortteam/VortLang" target="_blank" aria-label="VortLang GitHub Repository"><i class="fa-brands fa-square-github"></i> GitHub </a>
-    </main>
+  <div class="container">
+    <h1><strong>VORTLANG</strong></h1>
+    <div class="description">
+      VortLang is a language created by PingVortex. It's available under VortTeam's (PingVortex's organization) GitHub repo.
+    </div>
+    <a href="https://github.com/VortTeam/VortLang" target="_blank" class="github-btn">
+      <i class="fab fa-github"></i> GitHub
+    </a>
+  </div>
 </body>
 </html>
