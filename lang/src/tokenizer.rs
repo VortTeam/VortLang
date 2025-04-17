@@ -31,7 +31,7 @@ pub fn tokenize(expr: &str) -> Result<Vec<Token>, VortError> {
                 }
             }
             let num = num_str.replace('_', "").parse::<f64>()
-                .map_err(|e| VortError::ParseError(e.to_string()))?;
+                .map_err(|e| VortError::parse_error(e.to_string()))?;
             tokens.push(Token::Number(num));
         } else if c.is_alphabetic() || c == '_' {
             let mut var_str = String::new();
@@ -54,7 +54,7 @@ pub fn tokenize(expr: &str) -> Result<Vec<Token>, VortError> {
             tokens.push(Token::RightParen);
             chars.next();
         } else {
-            return Err(VortError::ParseError(format!("Unexpected character: {}", c)));
+            return Err(VortError::parse_error(format!("Unexpected character: {}", c)));
         }
     }
 
