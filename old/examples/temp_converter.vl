@@ -1,0 +1,17 @@
+# This program converts a temperature from Celsius to Fahrenheit
+
+# Define a Celsius temperature using a numeric variable
+num celsius = 25;  # 25 degrees Celsius
+
+# Convert to Fahrenheit using the formula: F = (C × 9/5) + 32
+# Note how expressions can use parentheses to control the order of operations
+# VortLang follows standard mathematical precedence rules
+num fahrenheit = (celsius times 9 divide 5) plus 32;
+# First: celsius times 9 = 225
+# Then: 225 divide 5 = 45
+# Finally: 45 plus 32 = 77
+
+# Display the result using string interpolation
+# The {celsius} and {fahrenheit} will be replaced with the actual values
+print(o"{celsius}°C is equal to {fahrenheit}°F");
+# The output will be: "25°C is equal to 77°F"
