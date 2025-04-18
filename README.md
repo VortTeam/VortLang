@@ -1,9 +1,6 @@
-# Working on compiled version, interpreted is not gonna be worked on anymore
-### Community can still contribute to it
-
 # VortLang
 
-VortLang is a minimal interpreted programming language written in Rust. Designed with simplicity and learning in mind, it offers clean syntax and fast execution.
+VortLang is a minimal compiled programming language written in Rust. Designed with simplicity and learning in mind, it offers clean syntax and fast execution.
 Its syntax is similar to Python's and Rust's.
 
 ![Rust](https://img.shields.io/badge/🦀%20rust-orange?style=for-the-badge)
@@ -39,11 +36,11 @@ VortLang is in its early stages and currently supports basic features like varia
 
 Run a VortLang script:
 ```bash
-cargo run --release <filename.vl>
+cargo run --release <path/to/filename.vl>
 ```
 or
 ```bash
-path\to\vortlang.exe <filename.vl>
+path/to/vortlang.exe <filename.vl>
 ```
 
 ### Example Script (`hello.vl`)
