@@ -1,3 +1,6 @@
+# Working on compiled version, interpreted is not gonna be worked on anymore
+### Community can still contribute to it
+
 # VortLang
 
 VortLang is a minimal interpreted programming language written in Rust. Designed with simplicity and learning in mind, it offers clean syntax and fast execution.
