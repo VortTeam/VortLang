@@ -63,6 +63,18 @@ pub enum TokenType {
     
     /// End of file marker
     EOF,
+    
+    /// The 'newfn' keyword for function definitions
+    NewFn,
+    
+    /// The 'callfn' keyword for function calls
+    CallFn,
+    
+    /// Opening brace '{' for function bodies
+    OpenBrace,
+    
+    /// Closing brace '}' for function bodies
+    CloseBrace,
 }
 
 /// Represents a token in the source code with its type and position information.
@@ -195,6 +207,24 @@ pub fn tokenize(source: &str, source_path: &str) -> Result<Vec<Token>, String> {
             '*' => {
                 tokens.push(Token {
                     token_type: TokenType::Star,
+                    line,
+                    column,
+                });
+                chars.next();
+                column += 1;
+            }
+            '{' => {
+                tokens.push(Token {
+                    token_type: TokenType::OpenBrace,
+                    line,
+                    column,
+                });
+                chars.next();
+                column += 1;
+            }
+            '}' => {
+                tokens.push(Token {
+                    token_type: TokenType::CloseBrace,
                     line,
                     column,
                 });
@@ -433,6 +463,20 @@ pub fn tokenize(source: &str, source_path: &str) -> Result<Vec<Token>, String> {
                         // Support for readable operator keyword 'divide'
                         tokens.push(Token {
                             token_type: TokenType::Slash,
+                            line,
+                            column: start_column,
+                        });
+                    }
+                    "newfn" => {
+                        tokens.push(Token {
+                            token_type: TokenType::NewFn,
+                            line,
+                            column: start_column,
+                        });
+                    }
+                    "callfn" => {
+                        tokens.push(Token {
+                            token_type: TokenType::CallFn,
                             line,
                             column: start_column,
                         });

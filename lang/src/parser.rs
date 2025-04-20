@@ -11,7 +11,7 @@
 // for each non-terminal in the grammar. Error reporting includes contextual
 // information to help users understand and fix syntax issues.
 
-use crate::ast::{BinaryOperator, Expression, NumExpression, Statement};
+use crate::ast::{BinaryOperator, Expression, NumExpression, Statement, FormatPart};
 use crate::errors::{ErrorPosition, format_error};
 use crate::lexer::{Token, TokenType};
 
@@ -32,6 +32,9 @@ pub struct Parser {
     
     /// Path to the source file (for error reporting)
     source_path: String,
+    
+    /// Flag to indicate if parsing is currently inside a function body
+    in_function: bool,
 }
 
 impl Parser {
@@ -52,6 +55,7 @@ impl Parser {
             current: 0,
             source,
             source_path,
+            in_function: false,
         }
     }
 
@@ -210,26 +214,78 @@ impl Parser {
                 return self.assignment_statement();
             }
         }
-    
-    if self.match_token(TokenType::Print) {
-        self.print_statement()
-    } else if self.match_token(TokenType::Let) {
-        self.let_statement()
-    } else if self.match_token(TokenType::Num) {
-        self.num_statement()
-    } else {
-        let token = self.peek().clone();
-        Err(format_error(
-            &self.source_path,
-            &self.source,
-            ErrorPosition {
-                line: token.line,
-                column: token.column,
-            },
-            "Expected statement".to_string(),
-            "Valid statements are 'print', 'let', and 'num'".to_string(),
-        ))
+        
+        if self.match_token(TokenType::Print) {
+            self.print_statement()
+        } else if self.match_token(TokenType::Let) {
+            self.let_statement()
+        } else if self.match_token(TokenType::Num) {
+            self.num_statement()
+        } else if self.match_token(TokenType::NewFn) {
+            self.function_definition()
+        } else if self.match_token(TokenType::CallFn) {
+            let name_token = self.consume(TokenType::Identifier("".to_string()), "Expected function name after 'callfn'")?;
+            let name = match &name_token.token_type {
+                TokenType::Identifier(name) => name.clone(),
+                _ => unreachable!(),
+            };
+            self.consume(TokenType::OpenParen, "Expected '(' after function name")?;
+            self.consume(TokenType::CloseParen, "Expected ')' after '('")?;
+            Ok(Statement::FunctionCall(name))
+        } else {
+            let token = self.peek().clone();
+            Err(format_error(
+                &self.source_path,
+                &self.source,
+                ErrorPosition {
+                    line: token.line,
+                    column: token.column,
+                },
+                "Expected statement".to_string(),
+                "Valid statements are 'print', 'let', 'num', 'newfn', or 'callfn'".to_string(),
+            ))
+        }
     }
+
+    /// Parses a function definition statement: 'newfn fn functionname() { ... }'.
+    ///
+    /// # Returns
+    ///
+    /// A Result containing either:
+    /// * A FunctionDefinition Statement object
+    /// * A formatted error message if parsing fails
+    fn function_definition(&mut self) -> Result<Statement, String> {
+        if self.in_function {
+            return Err(format_error(
+                &self.source_path,
+                &self.source,
+                ErrorPosition {
+                    line: self.peek().line,
+                    column: self.peek().column,
+                },
+                "Nested function definitions are not allowed".to_string(),
+                "Functions cannot be defined inside other functions".to_string(),
+            ));
+        }
+        self.consume(TokenType::Identifier("fn".to_string()), "Expected 'fn' after 'newfn'")?;
+        let name_token = self.consume(TokenType::Identifier("".to_string()), "Expected function name")?;
+        let name = match &name_token.token_type {
+            TokenType::Identifier(name) => name.clone(),
+            _ => unreachable!(),
+        };
+        self.consume(TokenType::OpenParen, "Expected '(' after function name")?;
+        self.consume(TokenType::CloseParen, "Expected ')' after '('")?;
+        self.consume(TokenType::OpenBrace, "Expected '{' to start function body")?;
+        
+        self.in_function = true;
+        let mut body = Vec::new();
+        while !self.check(&TokenType::CloseBrace) && !self.is_at_end() {
+            body.push(self.statement()?);
+        }
+        self.consume(TokenType::CloseBrace, "Expected '}' to end function body")?;
+        self.in_function = false;
+        
+        Ok(Statement::FunctionDefinition(name, body))
     }
 
     fn assignment_statement(&mut self) -> Result<Statement, String> {
@@ -272,7 +328,7 @@ impl Parser {
         }
     }
 
-    /// Parses a print statement.
+    /// Parses a print statement, supporting both regular and format strings.
     ///
     /// # Returns
     ///
@@ -281,20 +337,139 @@ impl Parser {
     /// * A formatted error message if parsing fails
     fn print_statement(&mut self) -> Result<Statement, String> {
         self.consume(TokenType::OpenParen, "Expected '(' after 'print'")?;
-
+        
         let format_string = matches!(self.peek().token_type, TokenType::FormatStringPrefix);
         if format_string {
             self.advance(); // Consume the format string prefix
         }
-
-        let expression = self.expression()?;
-
+        
+        let expr_token = self.consume(TokenType::StringLiteral("".to_string()), "Expected string literal")?;
+        let expr = match &expr_token.token_type {
+            TokenType::StringLiteral(value) => value.clone(),
+            _ => unreachable!(),
+        };
+        
         self.consume(TokenType::CloseParen, "Expected ')' after expression")?;
-
+        
         if format_string {
-            Ok(Statement::PrintFormat(expression))
+            let parts = self.parse_format_string(&expr)?;
+            Ok(Statement::PrintFormat(parts))
         } else {
-            Ok(Statement::Print(expression))
+            Ok(Statement::Print(Expression::StringLiteral(expr)))
+        }
+    }
+
+    /// Parses the content of a format string into a vector of FormatPart.
+    ///
+    /// # Arguments
+    ///
+    /// * `s` - The format string content to parse
+    ///
+    /// # Returns
+    ///
+    /// A Result containing either:
+    /// * A vector of FormatPart representing literals and expressions
+    /// * A formatted error message if parsing fails
+    fn parse_format_string(&self, s: &str) -> Result<Vec<FormatPart>, String> {
+        let mut parts = Vec::new();
+        let mut current_literal = String::new();
+        let mut i = 0;
+        let chars: Vec<char> = s.chars().collect();
+        
+        while i < chars.len() {
+            if chars[i] == '{' {
+                if !current_literal.is_empty() {
+                    parts.push(FormatPart::Literal(current_literal.clone()));
+                    current_literal.clear();
+                }
+                i += 1;
+                let mut expr_str = String::new();
+                while i < chars.len() && chars[i] != '}' {
+                    expr_str.push(chars[i]);
+                    i += 1;
+                }
+                if i >= chars.len() || chars[i] != '}' {
+                    return Err(format_error(
+                        &self.source_path,
+                        &self.source,
+                        ErrorPosition {
+                            line: self.peek().line,
+                            column: self.peek().column,
+                        },
+                        "Unclosed '{' in format string".to_string(),
+                        "Ensure all braces are properly closed".to_string(),
+                    ));
+                }
+                i += 1;
+                let expr = self.parse_format_expression(&expr_str)?;
+                parts.push(FormatPart::Expression(expr));
+            } else {
+                current_literal.push(chars[i]);
+                i += 1;
+            }
+        }
+        if !current_literal.is_empty() {
+            parts.push(FormatPart::Literal(current_literal));
+        }
+        Ok(parts)
+    }
+
+    /// Parses an expression within a format string's braces.
+    ///
+    /// # Arguments
+    ///
+    /// * `s` - The string content within '{...}'
+    ///
+    /// # Returns
+    ///
+    /// A Result containing either:
+    /// * An Expression (Variable or FunctionCall)
+    /// * A formatted error message if parsing fails
+    fn parse_format_expression(&self, s: &str) -> Result<Expression, String> {
+        let trimmed = s.trim();
+        if trimmed.starts_with("callfn ") {
+            let fn_name = trimmed[7..].trim();
+            if fn_name.ends_with("()") {
+                let name = &fn_name[..fn_name.len() - 2];
+                if name.chars().all(|c| c.is_alphanumeric() || c == '_') {
+                    Ok(Expression::FunctionCall(name.to_string()))
+                } else {
+                    Err(format_error(
+                        &self.source_path,
+                        &self.source,
+                        ErrorPosition {
+                            line: self.peek().line,
+                            column: self.peek().column,
+                        },
+                        format!("Invalid function name '{}'", name),
+                        "Function names must be alphanumeric with underscores".to_string(),
+                    ))
+                }
+            } else {
+                Err(format_error(
+                    &self.source_path,
+                    &self.source,
+                    ErrorPosition {
+                        line: self.peek().line,
+                        column: self.peek().column,
+                    },
+                    "Expected '()' after function name".to_string(),
+                    "Function calls in format strings must end with '()'".to_string(),
+                ))
+            }
+        } else if trimmed.chars().all(|c| c.is_alphanumeric() || c == '_') {
+            Ok(Expression::Variable(trimmed.to_string()))
+        } else {
+            Err(format_error(
+                &self.source_path,
+                &self.source,
+                ErrorPosition {
+                    line: self.peek().line,
+                    column: self.peek().column,
+                },
+                format!("Invalid expression in format string: '{}'", trimmed),
+                "Use a variable name or 'callfn functionname()'".to_string(),
+            ))
         }
     }
 

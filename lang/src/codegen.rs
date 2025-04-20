@@ -7,7 +7,7 @@
 // language construct, handling variable declarations, assignments, expressions,
 // and statements according to the language semantics.
 
-use crate::ast::{BinaryOperator, Expression, NumExpression, Statement};
+use crate::ast::{BinaryOperator, Expression, NumExpression, Statement, FormatPart};
 use std::collections::HashSet;
 
 /// Generates C code from the AST.
@@ -25,202 +25,241 @@ use std::collections::HashSet;
 /// * The generated C code as a String
 /// * An error message if code generation fails
 pub fn generate_c_code(ast: &[Statement]) -> Result<String, String> {
-    let mut code = String::new();
+    let mut code = String::with_capacity(4096);
 
     // Add standard includes required for the generated code
     code.push_str("#include <stdio.h>\n");
     code.push_str("#include <stdlib.h>\n");
     code.push_str("#include <string.h>\n");
-    code.push_str("#include <math.h>\n\n");  // For numerical operations
+    code.push_str("#include <math.h>\n\n");
+
+    // Collect all variable declarations from the program, including inside functions
+    let mut str_variables = HashSet::new();
+    let mut num_variables = HashSet::new();
+    collect_variables(ast, &mut str_variables, &mut num_variables);
+
+    // Generate global variable declarations
+    for var in &str_variables {
+        code.push_str(&format!("char* {};\n", var));
+    }
+    for var in &num_variables {
+        code.push_str(&format!("double {};\n", var));
+    }
+    code.push_str("\n");
+
+    // Separate function definitions from main program statements
+    let mut functions = Vec::new();
+    let mut main_statements = Vec::new();
+    for stmt in ast {
+        match stmt {
+            Statement::FunctionDefinition(name, body) => {
+                functions.push((name.clone(), body.clone()));
+            }
+            _ => {
+                main_statements.push(stmt.clone());
+            }
+        }
+    }
+
+    // Generate function definitions
+    for (name, body) in functions {
+        code.push_str(&format!("void {}(void) {{\n", name));
+        for stmt in body {
+            let stmt_code = generate_statement(&stmt, &str_variables, &num_variables)?;
+            code.push_str(&stmt_code);
+        }
+        code.push_str("}\n\n");
+    }
 
     // Start main function
     code.push_str("int main() {\n");
 
-    // Track declared variables to prevent redeclaration and ensure proper usage
-    let mut str_variables = HashSet::new();
-    let mut num_variables = HashSet::new();
-
-    // Generate code for each statement
-    for statement in ast {
-        match statement {
-            Statement::VariableDeclaration(name, expr, _line_number) => {
-                // Check for variable redeclaration
-                if str_variables.contains(name) || num_variables.contains(name) {
-                    return Err(format!("Variable '{}' already declared", name));
-                }
-
-                // String variable declaration
-                code.push_str("    char* ");
-                code.push_str(name);
-                code.push_str(" = ");
-
-                match expr {
-                    Expression::StringLiteral(value) => {
-                        code.push_str("\"");
-                        code.push_str(&escape_string(value));
-                        code.push_str("\"");
-                    }
-                    Expression::Variable(var) => {
-                        if !str_variables.contains(var) {
-                            return Err(format!("Variable '{}' used before declaration", var));
-                        }
-                        code.push_str(var);
-                    }
-                }
-
-                code.push_str(";\n");
-                str_variables.insert(name.clone());
-            }
-            Statement::NumDeclaration(name, expr, _line_number) => {
-                // Check for variable redeclaration
-                if str_variables.contains(name) || num_variables.contains(name) {
-                    return Err(format!("Variable '{}' already declared", name));
-                }
-
-                // Numerical variable declaration
-                code.push_str("    double ");
-                code.push_str(name);
-                code.push_str(" = ");
-
-                // Generate code for the numerical expression
-                let expr_code = generate_num_expression(expr, &num_variables)?;
-                code.push_str(&expr_code);
-
-                code.push_str(";\n");
-                num_variables.insert(name.clone());
-            }
-            Statement::VariableAssignment(name, expr, _line_number) => {
-                // Check if the target variable is declared
-                if !str_variables.contains(name) {
-                    return Err(format!("Variable '{}' assigned before declaration", name));
-                }
-                code.push_str("    ");
-                code.push_str(name);
-                code.push_str(" = ");
-                match expr {
-                    Expression::StringLiteral(value) => {
-                        code.push_str("\"");
-                        code.push_str(&escape_string(value));
-                        code.push_str("\"");
-                    }
-                    Expression::Variable(var) => {
-                        if !str_variables.contains(var) {
-                            return Err(format!("Variable '{}' used before declaration", var));
-                        }
-                        code.push_str(var);
-                    }
-                }
-                code.push_str(";\n");
-            }
-            Statement::NumAssignment(name, expr, _line_number) => {
-                // Check if the target variable is declared
-                if !num_variables.contains(name) {
-                    return Err(format!("Numerical variable '{}' assigned before declaration", name));
-                }
-                code.push_str("    ");
-                code.push_str(name);
-                code.push_str(" = ");
-                let expr_code = generate_num_expression(expr, &num_variables)?;
-                code.push_str(&expr_code);
-                code.push_str(";\n");
-            }
-            Statement::Print(expr) => match expr {
-                Expression::StringLiteral(value) => {
-                    code.push_str("    printf(\"%s\\n\", \"");
-                    code.push_str(&escape_string(value));
-                    code.push_str("\");\n");
-                }
-                Expression::Variable(var) => {
-                    if str_variables.contains(var) {
-                        // String variable
-                        code.push_str("    printf(\"%s\\n\", ");
-                        code.push_str(var);
-                        code.push_str(");\n");
-                    } else if num_variables.contains(var) {
-                        // Numerical variable
-                        code.push_str("    printf(\"%g\\n\", ");
-                        code.push_str(var);
-                        code.push_str(");\n");
-                    } else {
-                        return Err(format!("Variable '{}' used before declaration", var));
-                    }
-                }
-            },
-            Statement::PrintFormat(expr) => {
-                if let Expression::StringLiteral(value) = expr {
-                    // Process format string with variable interpolation
-                    let mut result = String::new();
-                    let mut i = 0;
-                    let chars: Vec<char> = value.chars().collect();
-                    let mut format_parts = Vec::new();
-                    let mut variables_to_print = Vec::new();
-
-                    while i < chars.len() {
-                        if chars[i] == '{' {
-                            let start = i;
-                            i += 1;
-                            let mut var_name = String::new();
-
-                            while i < chars.len() && chars[i] != '}' {
-                                var_name.push(chars[i]);
-                                i += 1;
-                            }
-
-                            if i < chars.len() && chars[i] == '}' {
-                                // Valid variable reference found
-                                if str_variables.contains(&var_name) {
-                                    result.push_str("%s");
-                                } else if num_variables.contains(&var_name) {
-                                    result.push_str("%g");
-                                } else {
-                                    return Err(format!(
-                                        "Variable '{}' used in format string before declaration",
-                                        var_name
-                                    ));
-                                }
-
-                                format_parts.push(result.clone());
-                                result.clear();
-                                variables_to_print.push(var_name);
-                                i += 1;
-                            } else {
-                                // Unclosed brace, treat as literal
-                                for j in start..i {
-                                    result.push(chars[j]);
-                                }
-                            }
-                        } else {
-                            result.push(chars[i]);
-                            i += 1;
-                        }
-                    }
-
-                    if !result.is_empty() {
-                        format_parts.push(result);
-                    }
-
-                    // Generate printf call
-                    code.push_str("    printf(\"");
-                    for part in &format_parts {
-                        code.push_str(&escape_string(part));
-                    }
-                    code.push_str("\\n\"");
-
-                    for var in &variables_to_print {
-                        code.push_str(", ");
-                        code.push_str(var);
-                    }
-
-                    code.push_str(");\n");
-                }
-            }
-        }
+    // Generate code for main statements
+    for stmt in main_statements {
+        let stmt_code = generate_statement(&stmt, &str_variables, &num_variables)?;
+        code.push_str(&stmt_code);
     }
 
     // End main function
     code.push_str("    return 0;\n");
     code.push_str("}\n");
 
+    Ok(code)
+}
+
+/// Collects all variable declarations from the AST, including inside functions.
+///
+/// Since all variables are global, this traverses the entire AST to gather
+/// string and numerical variable names.
+///
+/// # Arguments
+///
+/// * `statements` - The list of statements to analyze
+/// * `str_vars` - Set to store string variable names
+/// * `num_vars` - Set to store numerical variable names
+fn collect_variables(
+    statements: &[Statement],
+    str_vars: &mut HashSet<String>,
+    num_vars: &mut HashSet<String>,
+) {
+    for stmt in statements {
+        match stmt {
+            Statement::VariableDeclaration(name, _, _) => {
+                str_vars.insert(name.clone());
+            }
+            Statement::NumDeclaration(name, _, _) => {
+                num_vars.insert(name.clone());
+            }
+            Statement::FunctionDefinition(_, body) => {
+                collect_variables(body, str_vars, num_vars);
+            }
+            _ => {}
+        }
+    }
+}
+
+/// Generates C code for a single statement.
+///
+/// # Arguments
+///
+/// * `stmt` - The statement to generate code for
+/// * `str_vars` - Set of declared string variables
+/// * `num_vars` - Set of declared numerical variables
+///
+/// # Returns
+///
+/// A Result containing either:
+/// * The generated C code for the statement
+/// * An error message if code generation fails
+fn generate_statement(
+    stmt: &Statement,
+    str_vars: &HashSet<String>,
+    num_vars: &HashSet<String>,
+) -> Result<String, String> {
+    let mut code = String::new();
+    match stmt {
+        Statement::VariableDeclaration(name, expr, _) => {
+            // Treat as assignment since variable is declared globally
+            code.push_str("    ");
+            code.push_str(name);
+            code.push_str(" = ");
+            match expr {
+                Expression::StringLiteral(value) => {
+                    code.push_str("\"");
+                    code.push_str(&escape_string(value));
+                    code.push_str("\"");
+                }
+                Expression::Variable(var) => {
+                    if !str_vars.contains(var) {
+                        return Err(format!("Variable '{}' used before declaration", var));
+                    }
+                    code.push_str(var);
+                }
+                _ => return Err("Invalid expression for variable declaration".to_string()),
+            }
+            code.push_str(";\n");
+        }
+        Statement::NumDeclaration(name, expr, _) => {
+            // Treat as assignment since variable is declared globally
+            code.push_str("    ");
+            code.push_str(name);
+            code.push_str(" = ");
+            let expr_code = generate_num_expression(expr, num_vars)?;
+            code.push_str(&expr_code);
+            code.push_str(";\n");
+        }
+        Statement::VariableAssignment(name, expr, _) => {
+            if !str_vars.contains(name) {
+                return Err(format!("Variable '{}' assigned before declaration", name));
+            }
+            code.push_str("    ");
+            code.push_str(name);
+            code.push_str(" = ");
+            match expr {
+                Expression::StringLiteral(value) => {
+                    code.push_str("\"");
+                    code.push_str(&escape_string(value));
+                    code.push_str("\"");
+                }
+                Expression::Variable(var) => {
+                    if !str_vars.contains(var) {
+                        return Err(format!("Variable '{}' used before declaration", var));
+                    }
+                    code.push_str(var);
+                }
+                _ => return Err("Invalid expression for variable assignment".to_string()),
+            }
+            code.push_str(";\n");
+        }
+        Statement::NumAssignment(name, expr, _) => {
+            if !num_vars.contains(name) {
+                return Err(format!("Numerical variable '{}' assigned before declaration", name));
+            }
+            code.push_str("    ");
+            code.push_str(name);
+            code.push_str(" = ");
+            let expr_code = generate_num_expression(expr, num_vars)?;
+            code.push_str(&expr_code);
+            code.push_str(";\n");
+        }
+        Statement::Print(expr) => match expr {
+            Expression::StringLiteral(value) => {
+                code.push_str("    printf(\"%s\\n\", \"");
+                code.push_str(&escape_string(value));
+                code.push_str("\");\n");
+            }
+            Expression::Variable(var) => {
+                if str_vars.contains(var) {
+                    code.push_str("    printf(\"%s\\n\", ");
+                    code.push_str(var);
+                    code.push_str(");\n");
+                } else if num_vars.contains(var) {
+                    code.push_str("    printf(\"%g\\n\", ");
+                    code.push_str(var);
+                    code.push_str(");\n");
+                } else {
+                    return Err(format!("Variable '{}' used before declaration", var));
+                }
+            }
+            _ => return Err("Invalid expression for print statement".to_string()),
+        },
+        Statement::PrintFormat(parts) => {
+            // Generate separate statements for each part
+            for part in parts {
+                match part {
+                    FormatPart::Literal(s) => {
+                        code.push_str(&format!("    printf(\"%s\", \"{}\");", escape_string(s)));
+                    }
+                    FormatPart::Expression(expr) => {
+                        match expr {
+                            Expression::Variable(name) => {
+                                if str_vars.contains(name) {
+                                    code.push_str(&format!("    printf(\"%s\", {});", name));
+                                } else if num_vars.contains(name) {
+                                    code.push_str(&format!("    printf(\"%g\", {});", name));
+                                } else {
+                                    return Err(format!("Variable '{}' used before declaration", name));
+                                }
+                            }
+                            Expression::FunctionCall(name) => {
+                                code.push_str(&format!("    {}();", name));
+                            }
+                            _ => return Err("Invalid expression in format string".to_string()),
+                        }
+                    }
+                }
+            }
+            code.push_str("    printf(\"\\n\");\n");
+        }
+        Statement::FunctionCall(name) => {
+            code.push_str("    ");
+            code.push_str(name);
+            code.push_str("();\n");
+        }
+        Statement::FunctionDefinition(_, _) => {
+            // Handled at the top level, skip here
+        }
+    }
     Ok(code)
 }
 
@@ -286,9 +325,16 @@ fn generate_num_expression(
 ///
 /// The escaped string
 fn escape_string(s: &str) -> String {
-    s.replace("\\", "\\\\")
-        .replace("\"", "\\\"")
-        .replace("\n", "\\n")
-        .replace("\t", "\\t")
-        .replace("\r", "\\r")
+    let mut result = String::with_capacity(s.len());
+    for c in s.chars() {
+        match c {
+            '\\' => result.push_str("\\\\"),
+            '"' => result.push_str("\\\""),
+            '\n' => result.push_str("\\n"),
+            '\t' => result.push_str("\\t"),
+            '\r' => result.push_str("\\r"),
+            _ => result.push(c),
+        }
+    }
+    result
 }

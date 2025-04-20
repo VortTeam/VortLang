@@ -28,8 +28,9 @@ pub enum Statement {
     /// A print statement that outputs an expression's value to stdout.
     Print(Expression),
     
-    /// A formatted print statement that supports variable interpolation.
-    PrintFormat(Expression),
+    /// A formatted print statement that supports interpolation of literals,
+    /// variables, and function calls.
+    PrintFormat(Vec<FormatPart>),
     
     /// A string variable declaration and assignment.
     VariableDeclaration(String, Expression, usize),
@@ -37,9 +38,30 @@ pub enum Statement {
     /// A numerical variable declaration and assignment.
     NumDeclaration(String, NumExpression, usize),
 
-    VariableAssignment(String, Expression, usize),    // For reassigning string variables
+    /// Reassignment of an existing string variable.
+    VariableAssignment(String, Expression, #[allow(dead_code)] usize),
 
-    NumAssignment(String, NumExpression, usize),      // For reassigning numeric variables
+    /// Reassignment of an existing numeric variable.
+    NumAssignment(String, NumExpression, #[allow(dead_code)] usize),
+    
+    /// Definition of a function with a name and a body of statements.
+    FunctionDefinition(String, Vec<Statement>),
+    
+    /// A standalone call to a function.
+    FunctionCall(String),
+}
+
+/// Represents a part of a formatted print statement.
+/// 
+/// Used in PrintFormat to represent either a literal string or an expression
+/// (variable reference or function call) that appears within the format string.
+#[derive(Debug, Clone)]
+pub enum FormatPart {
+    /// A literal string portion of the format string.
+    Literal(String),
+    
+    /// An expression (variable or function call) to be evaluated or executed.
+    Expression(Expression),
 }
 
 /// Represents an expression in the Vortlang language.
@@ -53,6 +75,9 @@ pub enum Expression {
     
     /// A reference to a previously defined variable.
     Variable(String),
+    
+    /// A call to a function, used within format strings.
+    FunctionCall(String),
 }
 
 /// Represents a numerical expression in the Vortlang language.
@@ -127,11 +152,25 @@ pub fn analyze(ast: Vec<Statement>) -> (Vec<Statement>, Vec<String>) {
                 // Also track numerical variable declarations with source line numbers
                 declared_variables.insert(name.clone(), *line_number);
             },
+            Statement::FunctionDefinition(_, body) => {
+                // Recursively collect variables from function bodies since all variables are global
+                for body_stmt in body {
+                    match body_stmt {
+                        Statement::VariableDeclaration(name, _, line_number) => {
+                            declared_variables.insert(name.clone(), *line_number);
+                        },
+                        Statement::NumDeclaration(name, _, line_number) => {
+                            declared_variables.insert(name.clone(), *line_number);
+                        },
+                        _ => {}
+                    }
+                }
+            },
             _ => {}  // Skip other statement types
         }
     }
 
-    // Second pass: find all variable usages across the program
+    // Second pass: find all variable usages across the program, including inside functions
     for stmt in &ast {
         match stmt {
             Statement::Print(expr) => {
@@ -140,39 +179,56 @@ pub fn analyze(ast: Vec<Statement>) -> (Vec<Statement>, Vec<String>) {
                     used_variables.insert(name.clone());
                 }
             },
-            Statement::PrintFormat(expr) => {
-                // Handle format strings which may contain variable references
-                if let Expression::StringLiteral(format_str) = expr {
-                    // Extract variable names from format strings like "{variable}"
-                    let mut i = 0;
-                    let chars: Vec<char> = format_str.chars().collect();
-
-                    while i < chars.len() {
-                        if chars[i] == '{' {
-                            i += 1;
-                            let mut var_name = String::new();
-
-                            // Extract the variable name between braces
-                            while i < chars.len() && chars[i] != '}' {
-                                var_name.push(chars[i]);
-                                i += 1;
-                            }
-
-                            // If we found a complete variable reference, record it
-                            if i < chars.len() && chars[i] == '}' && !var_name.is_empty() {
-                                used_variables.insert(var_name);
-                            }
+            Statement::PrintFormat(parts) => {
+                // Handle format strings which may contain variable references or function calls
+                for part in parts {
+                    if let FormatPart::Expression(expr) = part {
+                        match expr {
+                            Expression::Variable(name) => {
+                                used_variables.insert(name.clone());
+                            },
+                            Expression::FunctionCall(_) => {
+                                // Function calls don't produce values, so no variable usage to track here
+                            },
+                            Expression::StringLiteral(_) => {},
                         }
-                        i += 1;
                     }
-                } else if let Expression::Variable(name) = expr {
-                    // Direct variable reference in format statement
-                    used_variables.insert(name.clone());
                 }
             },
             Statement::NumDeclaration(_, expr, _) => {
                 // Check for variable usage in numerical expressions
                 collect_num_expr_variables(expr, &mut used_variables);
+            },
+            Statement::NumAssignment(_, expr, _) => {
+                collect_num_expr_variables(expr, &mut used_variables);
+            },
+            Statement::FunctionDefinition(_, body) => {
+                // Analyze function body for variable usage
+                for body_stmt in body {
+                    match body_stmt {
+                        Statement::Print(expr) => {
+                            if let Expression::Variable(name) = expr {
+                                used_variables.insert(name.clone());
+                            }
+                        },
+                        Statement::PrintFormat(parts) => {
+                            for part in parts {
+                                if let FormatPart::Expression(expr) = part {
+                                    if let Expression::Variable(name) = expr {
+                                        used_variables.insert(name.clone());
+                                    }
+                                }
+                            }
+                        },
+                        Statement::NumDeclaration(_, expr, _) => {
+                            collect_num_expr_variables(expr, &mut used_variables);
+                        },
+                        Statement::NumAssignment(_, expr, _) => {
+                            collect_num_expr_variables(expr, &mut used_variables);
+                        },
+                        _ => {},
+                    }
+                }
             },
             _ => {}  // Skip other statement types
         }
