@@ -280,7 +280,9 @@ impl Parser {
         self.in_function = true;
         let mut body = Vec::new();
         while !self.check(&TokenType::CloseBrace) && !self.is_at_end() {
+            self.skip_newlines();
             body.push(self.statement()?);
+            self.skip_newlines();
         }
         self.consume(TokenType::CloseBrace, "Expected '}' to end function body")?;
         self.in_function = false;
