@@ -5,7 +5,7 @@ Its syntax is similar to Python's and Rust's.
 
 ![Rust](https://img.shields.io/badge/🦀%20rust-orange?style=for-the-badge)
 [![License](https://img.shields.io/badge/License-VORTTEAM%20GITHUB%20LICENSE%20v1-blueviolet?style=for-the-badge)](https://github.com/VortTeam/)\
-[![Discord](https://img.shields.io/badge/Discord-Join%20Now-5865F2?logo=discord&logoColor=white)](https://discord.gg/At3CcCqcR2)
+[![Discord](https://img.shields.io/badge/Discord-Join%20Now-5865F2?logo=discord&logoColor=white)](https://discord.gg/Efe5ws6jcP)
 
 
 ## Features
