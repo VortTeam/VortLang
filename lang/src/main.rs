@@ -1,7 +1,7 @@
 // main.rs - Entry point for the Vortlang compiler
 //
 // This file serves as the main entry point for the Vortlang compiler.
-// It orchestrates the compilation process by: 
+// It orchestrates the compilation process by:
 // 1. Parsing command-line arguments to get the source file
 // 2. Reading the source code from the file
 // 3. Coordinating the different phases of compilation (lexing, parsing, code generation)
