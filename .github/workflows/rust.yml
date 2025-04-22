@@ -1,0 +1,29 @@
+name: Build and Test VortLang
+
+on:
+  push:
+    paths:
+      - 'lang/**'
+  pull_request:
+    paths:
+      - 'lang/**'
+
+jobs:
+  build:
+
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: Checkout repository
+      uses: actions/checkout@v3
+
+    - name: Install Rust
+      uses: actions/setup-rust@v1
+      with:
+        rust-version: stable
+
+    - name: Build VortLang
+      run: cargo build --manifest-path lang/Cargo.toml --verbose
+
+    - name: Run tests
+      run: cargo test --manifest-path lang/Cargo.toml --verbose
