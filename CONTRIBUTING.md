@@ -40,11 +40,6 @@ Feel free to just add a comment or fix a typo.
 - If you want to implement a **new feature**, open an issue first to discuss it.
 - For **bugs**, please open an issue with steps to reproduce and expected behavior.
 
-## Testing
-
-- Try to test your changes with different VortLang scripts.
-- If adding a new feature (like a keyword), include an example in the [`examples/`](/examples) folder.
-
 ## Communication
 
 - Use issues and pull request comments to discuss ideas and changes.
