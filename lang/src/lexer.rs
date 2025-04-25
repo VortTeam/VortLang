@@ -14,7 +14,7 @@ use crate::errors::{ErrorPosition, format_error};
 ///
 /// Each variant corresponds to a specific lexical element of the language,
 /// such as keywords, operators, literals, etc.
-#[derive(Debug, Clone, PartialEq)]
+#[derive(Clone, PartialEq)]
 pub enum TokenType {
     /// The 'print' keyword for output statements
     Print,
@@ -75,13 +75,19 @@ pub enum TokenType {
     
     /// Closing brace '}' for function bodies
     CloseBrace,
+
+    /// Special marker `$c` indicating a function contains raw C code
+    DollarC, // Added for C code function syntax
+    
+    /// Raw C code block enclosed in triple braces `{{{ ... }}}`
+    RawCCode(String), // Added to store C code as a single token
 }
 
 /// Represents a token in the source code with its type and position information.
 ///
 /// This structure combines the semantic type of the token with its location
 /// in the source file, which is crucial for providing meaningful error messages.
-#[derive(Debug, Clone)]
+#[derive(Clone)]
 pub struct Token {
     /// The semantic type of the token
     pub token_type: TokenType,
@@ -159,6 +165,27 @@ pub fn tokenize(source: &str, source_path: &str) -> Result<Vec<Token>, String> {
                     });
                 }
             }
+            '$' => {
+                // Check for `$c` marker indicating a C code function
+                chars.next(); // Consume '$'
+                if let Some('c') = chars.peek() {
+                    chars.next(); // Consume 'c'
+                    column += 2; // Account for '$' and 'c'
+                    tokens.push(Token {
+                        token_type: TokenType::DollarC,
+                        line,
+                        column: column - 2, // Position at start of '$c'
+                    });
+                } else {
+                    return Err(format_error(
+                        source_path,
+                        source,
+                        ErrorPosition { line, column },
+                        "Invalid token starting with '$'".to_string(),
+                        "Expected '$c' for C code function".to_string(),
+                    ));
+                }
+            }
             '(' => {
                 tokens.push(Token {
                     token_type: TokenType::OpenParen,
@@ -214,13 +241,69 @@ pub fn tokenize(source: &str, source_path: &str) -> Result<Vec<Token>, String> {
                 column += 1;
             }
             '{' => {
-                tokens.push(Token {
-                    token_type: TokenType::OpenBrace,
-                    line,
-                    column,
-                });
                 chars.next();
-                column += 1;
+                if let Some('{') = chars.peek() {
+                    chars.next();
+                    if let Some('{') = chars.peek() {
+                        // Found `{{{`, start of a C code block
+                        chars.next();
+                        let start_column = column;
+                        column += 3; // For three '{'
+                        let start_line = line;
+                        let mut c_code_buffer = String::new();
+                        let mut brace_count = 0;
+
+                        // Collect characters until `}}}`
+                        loop {
+                            if let Some(next_c) = chars.next() {
+                                if next_c == '\n' {
+                                    line += 1;
+                                    column = 1;
+                                } else {
+                                    column += 1;
+                                }
+                                c_code_buffer.push(next_c);
+                                if next_c == '}' {
+                                    brace_count += 1;
+                                    if brace_count == 3 {
+                                        // Found `}}}`, end of C code block
+                                        c_code_buffer = c_code_buffer[..c_code_buffer.len() - 3].to_string();
+                                        tokens.push(Token {
+                                            token_type: TokenType::RawCCode(c_code_buffer),
+                                            line: start_line,
+                                            column: start_column,
+                                        });
+                                        break;
+                                    }
+                                } else {
+                                    brace_count = 0;
+                                }
+                            } else {
+                                return Err(format_error(
+                                    source_path,
+                                    source,
+                                    ErrorPosition { line, column },
+                                    "Unterminated C code block".to_string(),
+                                    "Expected '}}}' to close the C code block".to_string(),
+                                ));
+                            }
+                        }
+                    } else {
+                        tokens.push(Token {
+                            token_type: TokenType::OpenBrace,
+                            line,
+                            column: column - 2,
+                        });
+                        column += 2;
+                    }
+                } else {
+                    tokens.push(Token {
+                        token_type: TokenType::OpenBrace,
+                        line,
+                        column,
+                    });
+                    column += 1;
+                }
             }
             '}' => {
                 tokens.push(Token {
