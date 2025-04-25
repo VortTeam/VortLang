@@ -247,13 +247,10 @@ impl Parser {
         }
     }
 
-    /// Parses a function definition statement: 'newfn fn functionname() { ... }'.
-    ///
-    /// # Returns
-    ///
-    /// A Result containing either:
-    /// * A FunctionDefinition Statement object
-    /// * A formatted error message if parsing fails
+    /// Parses a function definition statement.
+    /// Supports two forms:
+    /// - Regular: 'newfn fn functionname() { ... }'
+    /// - C code: 'newfn $c functionname() {{{ C code }}}'
     fn function_definition(&mut self) -> Result<Statement, String> {
         if self.in_function {
             return Err(format_error(
@@ -267,27 +264,47 @@ impl Parser {
                 "Functions cannot be defined inside other functions".to_string(),
             ));
         }
-        self.consume(TokenType::Identifier("fn".to_string()), "Expected 'fn' after 'newfn'")?;
-        let name_token = self.consume(TokenType::Identifier("".to_string()), "Expected function name")?;
-        let name = match &name_token.token_type {
-            TokenType::Identifier(name) => name.clone(),
-            _ => unreachable!(),
-        };
-        self.consume(TokenType::OpenParen, "Expected '(' after function name")?;
-        self.consume(TokenType::CloseParen, "Expected ')' after '('")?;
-        self.consume(TokenType::OpenBrace, "Expected '{' to start function body")?;
-        
-        self.in_function = true;
-        let mut body = Vec::new();
-        while !self.check(&TokenType::CloseBrace) && !self.is_at_end() {
-            self.skip_newlines();
-            body.push(self.statement()?);
-            self.skip_newlines();
+
+        if self.match_token(TokenType::DollarC) {
+            // C code function: 'newfn $c fnname() {{{ C code }}}'
+            let name_token = self.consume(TokenType::Identifier("".to_string()), "Expected function name after '$c'")?;
+            let name = match &name_token.token_type {
+                TokenType::Identifier(name) => name.clone(),
+                _ => unreachable!(),
+            };
+            self.consume(TokenType::OpenParen, "Expected '(' after function name")?;
+            self.consume(TokenType::CloseParen, "Expected ')' after '('")?;
+            self.skip_newlines(); // Allow newlines before C code block
+            let c_code_token = self.consume(TokenType::RawCCode("".to_string()), "Expected C code block '{{{ ... }}}'")?;
+            let c_code = match &c_code_token.token_type {
+                TokenType::RawCCode(code) => code.clone(),
+                _ => unreachable!(),
+            };
+            Ok(Statement::CFunctionDefinition(name, c_code))
+        } else {
+            // Regular function: 'newfn fn functionname() { ... }'
+            self.consume(TokenType::Identifier("fn".to_string()), "Expected 'fn' after 'newfn'")?;
+            let name_token = self.consume(TokenType::Identifier("".to_string()), "Expected function name")?;
+            let name = match &name_token.token_type {
+                TokenType::Identifier(name) => name.clone(),
+                _ => unreachable!(),
+            };
+            self.consume(TokenType::OpenParen, "Expected '(' after function name")?;
+            self.consume(TokenType::CloseParen, "Expected ')' after '('")?;
+            self.consume(TokenType::OpenBrace, "Expected '{' to start function body")?;
+            
+            self.in_function = true;
+            let mut body = Vec::new();
+            while !self.check(&TokenType::CloseBrace) && !self.is_at_end() {
+                self.skip_newlines();
+                body.push(self.statement()?);
+                self.skip_newlines();
+            }
+            self.consume(TokenType::CloseBrace, "Expected '}' to end function body")?;
+            self.in_function = false;
+            
+            Ok(Statement::FunctionDefinition(name, body))
         }
-        self.consume(TokenType::CloseBrace, "Expected '}' to end function body")?;
-        self.in_function = false;
-        
-        Ok(Statement::FunctionDefinition(name, body))
     }
 
     fn assignment_statement(&mut self) -> Result<Statement, String> {
@@ -691,6 +708,8 @@ impl Parser {
             ))
         }
     }
+
+
 }
 
 /// Convenience function to parse a token stream into an AST.
