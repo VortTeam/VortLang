@@ -9,21 +9,11 @@
 // This representation makes it easy to analyze and transform the code before
 // generating the target output.
 
-/// Represents a generic node in the AST. 
-/// 
-/// This is a convenience type that can represent either a Statement or an Expression,
-/// allowing us to build a heterogeneous tree structure if needed.
-#[derive(Debug, Clone)]
-pub enum _Node {
-    Statement(Statement),
-    Expression(Expression),
-}
-
 /// Represents a statement in the Vortlang language.
 /// 
 /// Statements are top-level constructs that perform actions or declare variables.
 /// They don't produce values directly but instead cause effects or define bindings.
-#[derive(Debug, Clone)]
+#[derive(Clone)]
 pub enum Statement {
     /// A print statement that outputs an expression's value to stdout.
     Print(Expression),
@@ -44,18 +34,22 @@ pub enum Statement {
     /// Reassignment of an existing numeric variable.
     NumAssignment(String, NumExpression, #[allow(dead_code)] usize),
     
-    /// Definition of a function with a name and a body of statements.
+    /// Definition of a regular function with a name and a body of Vortlang statements.
     FunctionDefinition(String, Vec<Statement>),
     
-    /// A standalone call to a function.
+    /// A standalone call to a function (works for both regular and C functions).
     FunctionCall(String),
+
+    /// Definition of a function containing raw C code, identified by `$c` in the syntax.
+    /// The first String is the function name, the second String is the raw C code.
+    CFunctionDefinition(String, String), // Added to support C code embedding
 }
 
 /// Represents a part of a formatted print statement.
 /// 
 /// Used in PrintFormat to represent either a literal string or an expression
 /// (variable reference or function call) that appears within the format string.
-#[derive(Debug, Clone)]
+#[derive(Clone)]
 pub enum FormatPart {
     /// A literal string portion of the format string.
     Literal(String),
@@ -68,7 +62,7 @@ pub enum FormatPart {
 /// 
 /// Expressions are constructs that can be evaluated to produce a value.
 /// They can appear within statements or within other expressions.
-#[derive(Debug, Clone)]
+#[derive(Clone)]
 pub enum Expression {
     /// A string literal enclosed in double quotes.
     StringLiteral(String),
@@ -84,7 +78,7 @@ pub enum Expression {
 /// 
 /// Numerical expressions are used specifically for mathematical operations
 /// and can be nested to form complex calculations.
-#[derive(Debug, Clone)]
+#[derive(Clone)]
 pub enum NumExpression {
     /// A literal numerical value (integer or float).
     NumberLiteral(f64),
@@ -100,7 +94,7 @@ pub enum NumExpression {
 }
 
 /// Represents binary mathematical operators in the Vortlang language.
-#[derive(Debug, Clone)]
+#[derive(Clone)]
 pub enum BinaryOperator {
     /// Addition operator (+)
     Add,
