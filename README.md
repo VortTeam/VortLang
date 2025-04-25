@@ -3,8 +3,8 @@
 VortLang is a minimal compiled programming language written in Rust. Designed with simplicity and learning in mind, it offers clean syntax and fast execution.
 Its syntax is similar to Python's and Rust's.
 
-![Rust](https://img.shields.io/badge/🦀%20rust-orange?style=for-the-badge)
-[![License](https://img.shields.io/badge/License-VORTTEAM%20GITHUB%20LICENSE%20v1-blueviolet?style=for-the-badge)](https://github.com/VortTeam/)\
+![Rust](https://img.shields.io/badge/🦀%20rust-orange?style=for-the-badge)\
+[![License](https://img.shields.io/badge/License-Apache_2.0-blue.svg)](https://github.com/VortTeam/)
 [![Discord](https://img.shields.io/badge/Discord-Join%20Now-5865F2?logo=discord&logoColor=white)](https://discord.gg/Efe5ws6jcP)
 
 
@@ -59,7 +59,7 @@ Hello World! Result: 20
 
 ## License
 
-Licensed under [VORTTEAM GITHUB LICENSE VERSION 1.0](LICENSE).
+Licensed under [Apache 2.0 License](LICENSE).
 
 ## Contributing
 
