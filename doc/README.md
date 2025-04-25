@@ -1,3 +1,7 @@
+> **Disclaimer:** VortLang is in early development and continues to evolve. The documentation will not be updated until VortLang becomes more advanced or starts seeing significant use. Stay tuned for future updates!
+
+
+
 # Vortlang Documentation
 
 ## Introduction
