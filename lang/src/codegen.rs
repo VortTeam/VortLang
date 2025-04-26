@@ -35,16 +35,32 @@ enum FunctionType {
 pub fn generate_c_code(ast: &[Statement]) -> Result<String, String> {
     let mut code = String::new();
 
-    // Add standard includes required for the generated code
+    // Add standard includes
     write!(
         code,
         "#include <stdio.h>\n#include <stdlib.h>\n#include <string.h>\n#include <math.h>\n\n"
     ).unwrap();
 
-    // Collect all variable declarations from the program, including inside functions
+    // Collect variables and functions from the AST
     let mut str_variables = HashSet::new();
     let mut num_variables = HashSet::new();
     collect_variables(ast, &mut str_variables, &mut num_variables);
+
+    let mut functions = Vec::new();
+    let mut main_statements = Vec::new();
+    for stmt in ast {
+        match stmt {
+            Statement::FunctionDefinition(name, body) => {
+                functions.push((name.clone(), FunctionType::Regular(body.clone())));
+            }
+            Statement::CFunctionDefinition(name, c_code) => {
+                functions.push((name.clone(), FunctionType::CCode(c_code.clone())));
+            }
+            _ => {
+                main_statements.push(stmt.clone());
+            }
+        }
+    }
 
     // Generate global variable declarations
     for var in &str_variables {
@@ -55,51 +71,42 @@ pub fn generate_c_code(ast: &[Statement]) -> Result<String, String> {
     }
     code.push_str("\n");
 
-   // Collect both regular and C code function definitions
-   let mut functions = Vec::new();
-   let mut main_statements = Vec::new();
-   for stmt in ast {
-       match stmt {
-           Statement::FunctionDefinition(name, body) => {
-               functions.push((name.clone(), FunctionType::Regular(body.clone())));
-           }
-           Statement::CFunctionDefinition(name, c_code) => {
-               functions.push((name.clone(), FunctionType::CCode(c_code.clone())));
-           }
-           _ => {
-               main_statements.push(stmt.clone());
-           }
-       }
-   }
+    // Generate function prototypes
+    code.push_str("// Function prototypes\n");
+    for (name, _) in &functions {
+        code.push_str(&format!("void {}();\n", name));
+    }
+    code.push_str("\n");
 
-   // Generate function definitions
-   for (name, func_type) in functions {
-       match func_type {
-           FunctionType::Regular(body) => {
-               code.push_str(&format!("void {}(void) {{\n", name));
-               for stmt in body {
-                   let stmt_code = generate_statement(&stmt, &str_variables, &num_variables)?;
-                   code.push_str(&stmt_code);
-               }
-               code.push_str("}\n\n");
-           }
-           FunctionType::CCode(c_code) => {
-               // Directly insert the raw C code into the function body
-               code.push_str(&format!("void {}(void) {{ {} }}\n\n", name, c_code));
-           }
-       }
-   }
+    // Generate function definitions
+    for (name, func_type) in functions {
+        match func_type {
+            FunctionType::Regular(body) => {
+                code.push_str(&format!("void {}(void) {{\n", name));
+                for stmt in body {
+                    let stmt_code = generate_statement(&stmt, &str_variables, &num_variables)?;
+                    code.push_str(&stmt_code);
+                }
+                code.push_str("}\n\n");
+            }
+            FunctionType::CCode(c_code) => {
+                code.push_str(&format!("void {}(void) {{ {} }}\n\n", name, c_code));
+            }
+        }
+    }
 
-   code.push_str("int main() {\n");
-   for stmt in main_statements {
-       let stmt_code = generate_statement(&stmt, &str_variables, &num_variables)?;
-       code.push_str(&stmt_code);
-   }
-   code.push_str("    return 0;\n");
-   code.push_str("}\n");
+    // Generate main function
+    code.push_str("int main() {\n");
+    for stmt in main_statements {
+        let stmt_code = generate_statement(&stmt, &str_variables, &num_variables)?;
+        code.push_str(&stmt_code);
+    }
+    code.push_str("    return 0;\n");
+    code.push_str("}\n");
 
-   Ok(code)
+    Ok(code)
 }
+
 
 /// Collects all variable declarations from the AST, including inside functions.
 ///
