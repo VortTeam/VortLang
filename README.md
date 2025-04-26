@@ -6,18 +6,7 @@ Its syntax is similar to Python's and Rust's.
 ![Rust](https://img.shields.io/badge/🦀%20rust-orange?style=for-the-badge)\
 [![License](https://img.shields.io/badge/License-Apache_2.0-blue.svg)](https://github.com/VortTeam/)
 [![Discord](https://img.shields.io/badge/Discord-Join%20Now-5865F2?logo=discord&logoColor=white)](https://discord.gg/Efe5ws6jcP)
-
-
-## Features
-
-- **Simple Syntax**: Declare variables with `let` (strings) and `num` (numbers).
-- **Formatted Printing**: Use `print(o"...")` with `{variable}` placeholders.
-- **Expression Evaluation**: Supports arithmetic operations with keywords like `plus`, `minus`, etc.
-- **Error Handling**: Clear error messages for undefined variables or invalid syntax.
-
-## Current Status  
-
-VortLang is in its early stages and currently supports basic features like variable declarations and arithmetic. More functionality is planned for future releases. Stay tuned!  
+ 
 
 ## Installation
 
